@@ -1,0 +1,2904 @@
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestión de Ventas Streaming</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  />
+  <style>
+    /* MacOS style window effect */
+    .mac-window {
+      background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.1),
+        0 1px 3px rgba(0,0,0,0.06);
+      transition: box-shadow 0.3s ease, transform 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .mac-window:active {
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.2),
+        0 1px 2px rgba(0,0,0,0.12);
+      transform: translateY(1px);
+    }
+    .mac-window-header {
+      height: 28px;
+      background: #e0e0e0;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      user-select: none;
+    }
+    /* Button press effect */
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2) inset;
+      transition: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <div class="max-w-5xl mx-auto p-4 flex flex-col flex-grow">
+    <header class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <h1 class="text-2xl font-extrabold text-gray-900">Gestión de Ventas de Cuentas Streaming</h1>
+      <div class="flex gap-3 flex-wrap">
+        <button id="btnMostrarFormularioCliente" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-5 py-2 transition flex items-center gap-2 mac-window" type="button">
+          <i class="fas fa-plus"></i> Registrar Nueva Venta
+        </button>
+        <button id="btnMostrarFormularioRevendedor" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded px-5 py-2 transition flex items-center gap-2 mac-window" type="button">
+          <i class="fas fa-store"></i> Registrar Venta de Revendedores
+        </button>
+      </div>
+    </header>
+
+    <!-- Formulario registro venta oculto inicialmente -->
+    <section id="formularioRegistro" class="bg-white rounded-lg shadow p-6 mb-6 hidden mac-window" aria-hidden="true">
+      <div class="mac-window-header">
+        <div class="circle"></div>
+      </div>
+      <div class="mac-window-content">
+        <h2 id="tituloFormulario" class="text-lg font-semibold mb-4">Registrar Nueva Venta</h2>
+        <form id="ventaForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4" novalidate>
+          <div class="flex flex-col">
+            <label id="labelNombreCliente" for="clienteNombre" class="text-sm font-medium text-gray-700 mb-1">Nombre del cliente <span class="text-red-600">*</span></label>
+            <input type="text" id="clienteNombre" name="clienteNombre" required class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div class="flex flex-col">
+            <label for="clienteTelefono" class="text-sm font-medium text-gray-700 mb-1">Número de teléfono (opcional)</label>
+            <input type="tel" id="clienteTelefono" name="clienteTelefono" placeholder="+54912345678" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div class="flex flex-col">
+            <label for="plataforma" class="text-sm font-medium text-gray-700 mb-1">Plataforma</label>
+            <select id="plataforma" name="plataforma" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="Netflix">Netflix</option>
+              <option value="Disney+">Disney+</option>
+              <option value="Prime Video">Prime Video</option>
+            </select>
+          </div>
+          <div class="flex flex-col">
+            <label for="pantalla" class="text-sm font-medium text-gray-700 mb-1">Pantalla (Crack)</label>
+            <select id="pantalla" name="pantalla" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="Crack 1">Crack 1</option>
+              <option value="Crack 2">Crack 2</option>
+              <option value="Crack 3">Crack 3</option>
+              <option value="Crack 4">Crack 4</option>
+            </select>
+          </div>
+          <div class="flex flex-col">
+            <label for="precio" class="text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+            <input type="number" id="precio" name="precio" min="0" step="0.01" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <div class="flex flex-col">
+            <label for="fechaVencimiento" class="text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
+            <input type="date" id="fechaVencimiento" name="fechaVencimiento" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          </div>
+          <div class="flex items-center space-x-2 sm:col-span-2">
+            <input type="checkbox" id="whatsappAuto" name="whatsappAuto" class="h-4 w-4 text-green-600 border-gray-300 rounded" checked />
+            <label for="whatsappAuto" class="text-sm text-gray-700 select-none">Enviar WhatsApp automático al registrar</label>
+          </div>
+          <div class="sm:col-span-2 flex justify-end space-x-2">
+            <button type="button" id="btnCancelarFormulario" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded px-5 py-2 transition mac-window">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-5 py-2 transition mac-window">
+              Registrar Venta
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Estadísticas -->
+    <section class="bg-white rounded-lg shadow p-6 mb-6 mac-window">
+      <h2 class="text-lg font-semibold mb-4">Estadísticas</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 text-gray-700">
+        <div class="bg-gray-50 rounded p-4 text-center">
+          <p class="text-sm font-medium mb-1">Total de Ventas</p>
+          <p id="totalVentas" class="text-2xl font-extrabold text-gray-900">0</p>
+        </div>
+        <div class="bg-gray-50 rounded p-4 text-center">
+          <p class="text-sm font-medium mb-1">Ingresos Totales</p>
+          <p id="ingresosTotales" class="text-2xl font-extrabold text-gray-900">$0</p>
+          <p class="text-xs text-gray-500 mt-1">Hoy / Semana / Mes</p>
+        </div>
+        <div class="bg-gray-50 rounded p-4 text-center cursor-pointer" id="cuentasPorVencerContainer" title="Ver cuentas por vencer">
+          <p class="text-sm font-medium mb-1 text-red-600 underline">Cuentas por Vencer (3 días)</p>
+          <p id="cuentasPorVencer" class="text-2xl font-extrabold text-red-600">0</p>
+        </div>
+        <div class="bg-gray-50 rounded p-4 text-center cursor-pointer" id="cuentasPorVencerRevendedoresContainer" title="Ver cuentas de revendedores por vencer">
+          <p class="text-sm font-medium mb-1 text-purple-600 underline">Revendedores por Vencer (3 días)</p>
+          <p id="cuentasPorVencerRevendedores" class="text-2xl font-extrabold text-purple-600">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cuentas próximas a vencer -->
+    <section class="bg-white rounded-lg shadow p-6 mb-6 mac-window">
+      <h2 class="text-lg font-semibold mb-4">Cuentas Próximas a Vencer (3 días)</h2>
+      <div id="vencimientosProximos" class="space-y-3 max-h-48 overflow-y-auto text-gray-700">
+        <p class="text-sm text-gray-500 italic">No hay cuentas próximas a vencer.</p>
+      </div>
+    </section>
+
+    <!-- Revendedores próximas a vencer -->
+    <section class="bg-white rounded-lg shadow p-6 mb-6 mac-window">
+      <h2 class="text-lg font-semibold mb-4">Revendedores Próximos a Vencer (3 días)</h2>
+      <div id="vencimientosProximosRevendedores" class="space-y-3 max-h-48 overflow-y-auto text-gray-700">
+        <p class="text-sm text-gray-500 italic">No hay revendedores próximos a vencer.</p>
+      </div>
+    </section>
+
+    <!-- Tabla ventas -->
+    <section class="bg-white rounded-lg shadow p-6 mb-6 overflow-x-auto mac-window">
+      <h2 class="text-lg font-semibold mb-4">Ventas Registradas</h2>
+      <table class="min-w-full text-left text-sm text-gray-700 border-collapse">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 border border-gray-300">Cliente</th>
+            <th class="p-2 border border-gray-300">Teléfono</th>
+            <th class="p-2 border border-gray-300">Plataforma</th>
+            <th class="p-2 border border-gray-300">Crack</th>
+            <th class="p-2 border border-gray-300">Precio ($)</th>
+            <th class="p-2 border border-gray-300">Fecha Venta</th>
+            <th class="p-2 border border-gray-300">Vencimiento</th>
+            <th class="p-2 border border-gray-300">Días Restantes</th>
+            <th class="p-2 border border-gray-300 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaVentas" class="divide-y divide-gray-200"></tbody>
+      </table>
+      <p id="sinVentas" class="text-center text-gray-500 mt-4 italic">No hay ventas registradas.</p>
+    </section>
+  </div>
+
+  <!-- Modal editar venta -->
+  <div id="modalEditar" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative mac-window">
+      <button id="cerrarModal" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-xl font-bold" aria-label="Cerrar modal" type="button">&times;</button>
+      <h3 id="modalTitle" class="text-xl font-semibold mb-4">Editar Venta</h3>
+      <form id="formEditar" class="grid grid-cols-1 gap-4" novalidate>
+        <div class="flex flex-col">
+          <label for="editClienteNombre" class="text-sm font-medium text-gray-700 mb-1">Nombre del cliente <span class="text-red-600">*</span></label>
+          <input type="text" id="editClienteNombre" name="editClienteNombre" required class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div class="flex flex-col">
+          <label for="editClienteTelefono" class="text-sm font-medium text-gray-700 mb-1">Número de teléfono (opcional)</label>
+          <input type="tel" id="editClienteTelefono" name="editClienteTelefono" placeholder="+56912345678" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div class="flex flex-col">
+          <label for="editPlataforma" class="text-sm font-medium text-gray-700 mb-1">Plataforma</label>
+          <select id="editPlataforma" name="editPlataforma" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <option value="Netflix">Netflix</option>
+            <option value="Disney+">Disney+</option>
+            <option value="Prime Video">Prime Video</option>
+          </select>
+        </div>
+        <div class="flex flex-col">
+          <label for="editPantalla" class="text-sm font-medium text-gray-700 mb-1">Pantalla (Crack)</label>
+          <select id="editPantalla" name="editPantalla" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <option value="Crack 1">Crack 1</option>
+            <option value="Crack 2">Crack 2</option>
+            <option value="Crack 3">Crack 3</option>
+            <option value="Crack 4">Crack 4</option>
+          </select>
+        </div>
+        <div class="flex flex-col">
+          <label for="editPrecio" class="text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+          <input type="number" id="editPrecio" name="editPrecio" min="0" step="0.01" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+        </div>
+        <div class="flex flex-col">
+          <label for="editFechaVencimiento" class="text-sm font-medium text-gray-700 mb-1">Fecha de vencimiento</label>
+          <input type="date" id="editFechaVencimiento" name="editFechaVencimiento" class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+        </div>
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" id="btnEliminarVenta" class="bg-red-600 hover:bg-red-700 text-white font-semibold rounded px-4 py-2 transition mac-window">
+            Eliminar
+          </button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-4 py-2 transition mac-window">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal WhatsApp cuentas por vencer -->
+  <div id="modalWhatsApp" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="modalWhatsAppTitle">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative mac-window">
+      <button id="cerrarModalWhatsApp" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-xl font-bold" aria-label="Cerrar modal WhatsApp" type="button">&times;</button>
+      <h3 id="modalWhatsAppTitle" class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <i class="fab fa-whatsapp text-green-600 text-2xl"></i> Enviar WhatsApp a Cliente
+      </h3>
+      <div id="contenidoWhatsApp" class="text-gray-700 text-sm space-y-3">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="mt-6 flex justify-end space-x-3">
+        <button id="btnCerrarWhatsApp" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded px-4 py-2 transition mac-window" type="button">Cerrar</button>
+        <button id="btnEnviarWhatsAppModal" class="bg-green-600 hover:bg-green-700 text-white font-semibold rounded px-4 py-2 transition mac-window" type="button">
+          <i class="fab fa-whatsapp mr-2"></i> Enviar WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal WhatsApp revendedores por vencer -->
+  <div id="modalWhatsAppRevendedores" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="modalWhatsAppRevendedoresTitle">
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative mac-window">
+      <button id="cerrarModalWhatsAppRevendedores" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-xl font-bold" aria-label="Cerrar modal WhatsApp Revendedores" type="button">&times;</button>
+      <h3 id="modalWhatsAppRevendedoresTitle" class="text-xl font-semibold mb-4 flex items-center gap-2">
+        <i class="fab fa-whatsapp text-purple-600 text-2xl"></i> Enviar WhatsApp a Revendedor
+      </h3>
+      <div id="contenidoWhatsAppRevendedores" class="text-gray-700 text-sm space-y-3">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="mt-6 flex justify-end space-x-3">
+        <button id="btnCerrarWhatsAppRevendedores" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded px-4 py-2 transition mac-window" type="button">Cerrar</button>
+        <button id="btnEnviarWhatsAppModalRevendedores" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded px-4 py-2 transition mac-window" type="button">
+          <i class="fab fa-whatsapp mr-2"></i> Enviar WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Precios predeterminados
+    const precios = {
+      Netflix: {
+        "Crack 1": 3500,
+        "Crack 2": 4200,
+        "Crack 3": 5000,
+        "Crack 4": 5800,
+      },
+      "Disney+": {
+        "Crack 1": 3000,
+        "Crack 2": 3400,
+        "Crack 3": 3800,
+        "Crack 4": 4200,
+      },
+      "Prime Video":  {
+        "Crack 1": 3900,
+        "Crack 2": 7800,
+        "Crack 3": 11700,
+        "Crack 4": 15600,
+      },
+    };
+
+    // Estado app
+    let ventas = JSON.parse(localStorage.getItem("ventasStreaming")) || [];
+    let whatsappAuto = true;
+    let editarId = null;
+
+    // Elementos DOM
+    const ventaForm = document.getElementById("ventaForm");
+    const clienteNombreInput = document.getElementById("clienteNombre");
+    const clienteTelefonoInput = document.getElementById("clienteTelefono");
+    const plataformaSelect = document.getElementById("plataforma");
+    const pantallaSelect = document.getElementById("pantalla");
+    const precioInput = document.getElementById("precio");
+    const fechaVencimientoInput = document.getElementById("fechaVencimiento");
+    const whatsappAutoCheckbox = document.getElementById("whatsappAuto");
+
+    const totalVentasEl = document.getElementById("totalVentas");
+    const ingresosTotalesEl = document.getElementById("ingresosTotales");
+    const cuentasPorVencerEl = document.getElementById("cuentasPorVencer");
+    const cuentasPorVencerContainer = document.getElementById("cuentasPorVencerContainer");
+    const cuentasPorVencerRevendedoresEl = document.getElementById("cuentasPorVencerRevendedores");
+    const cuentasPorVencerRevendedoresContainer = document.getElementById("cuentasPorVencerRevendedoresContainer");
+    const vencimientosProximosEl = document.getElementById("vencimientosProximos");
+    const vencimientosProximosRevendedoresEl = document.getElementById("vencimientosProximosRevendedores");
+    const tablaVentas = document.getElementById("tablaVentas");
+    const sinVentas = document.getElementById("sinVentas");
+
+    const modalEditar = document.getElementById("modalEditar");
+    const cerrarModalBtn = document.getElementById("cerrarModal");
+    const formEditar = document.getElementById("formEditar");
+    const btnEliminarVenta = document.getElementById("btnEliminarVenta");
+
+    const editClienteNombre = document.getElementById("editClienteNombre");
+    const editClienteTelefono = document.getElementById("editClienteTelefono");
+    const editPlataforma = document.getElementById("editPlataforma");
+    const editPantalla = document.getElementById("editPantalla");
+    const editPrecio = document.getElementById("editPrecio");
+    const editFechaVencimiento = document.getElementById("editFechaVencimiento");
+
+    const btnMostrarFormularioCliente = document.getElementById("btnMostrarFormularioCliente");
+    const btnMostrarFormularioRevendedor = document.getElementById("btnMostrarFormularioRevendedor");
+    const formularioRegistro = document.getElementById("formularioRegistro");
+    const btnCancelarFormulario = document.getElementById("btnCancelarFormulario");
+    const tituloFormulario = document.getElementById("tituloFormulario");
+    const labelNombreCliente = document.getElementById("labelNombreCliente");
+
+    // Modal WhatsApp cuentas por vencer
+    const modalWhatsApp = document.getElementById("modalWhatsApp");
+    const cerrarModalWhatsAppBtn = document.getElementById("cerrarModalWhatsApp");
+    const btnCerrarWhatsApp = document.getElementById("btnCerrarWhatsApp");
+    const btnEnviarWhatsAppModal = document.getElementById("btnEnviarWhatsAppModal");
+    const contenidoWhatsApp = document.getElementById("contenidoWhatsApp");
+
+    // Modal WhatsApp revendedores por vencer
+    const modalWhatsAppRevendedores = document.getElementById("modalWhatsAppRevendedores");
+    const cerrarModalWhatsAppRevendedoresBtn = document.getElementById("cerrarModalWhatsAppRevendedores");
+    const btnCerrarWhatsAppRevendedores = document.getElementById("btnCerrarWhatsAppRevendedores");
+    const btnEnviarWhatsAppModalRevendedores = document.getElementById("btnEnviarWhatsAppModalRevendedores");
+    const contenidoWhatsAppRevendedores = document.getElementById("contenidoWhatsAppRevendedores");
+
+    let ventasPorVencer = [];
+    let ventasPorVencerRevendedores = [];
+    let ventaSeleccionadaWhatsApp = null;
+
+    // Variable para saber si es venta revendedor o cliente
+    let esVentaRevendedor = false;
+
+    // Funciones auxiliares
+    function formatDate(date) {
+      const d = new Date(date);
+      return d.toLocaleDateString("es-CL");
+    }
+
+    function daysBetween(date1, date2) {
+      const diffTime = date2 - date1;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function saveVentas() {
+      localStorage.setItem("ventasStreaming", JSON.stringify(ventas));
+    }
+
+    function calcularIngresosPorPeriodo() {
+      const hoy = new Date();
+      const inicioSemana = new Date(hoy);
+      inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+      let ingresosHoy = 0;
+      let ingresosSemana = 0;
+      let ingresosMes = 0;
+
+      ventas.forEach((v) => {
+        const fechaVenta = new Date(v.fechaVenta);
+        if (
+          fechaVenta.getDate() === hoy.getDate() &&
+          fechaVenta.getMonth() === hoy.getMonth() &&
+          fechaVenta.getFullYear() === hoy.getFullYear()
+        ) {
+          ingresosHoy += v.precio;
+        }
+        if (fechaVenta >= inicioSemana && fechaVenta <= hoy) {
+          ingresosSemana += v.precio;
+        }
+        if (
+          fechaVenta.getMonth() === hoy.getMonth() &&
+          fechaVenta.getFullYear() === hoy.getFullYear()
+        ) {
+          ingresosMes += v.precio;
+        }
+      });
+
+      return { ingresosHoy, ingresosSemana, ingresosMes };
+    }
+
+    function actualizarEstadisticas() {
+      totalVentasEl.textContent = ventas.length;
+
+      const { ingresosHoy, ingresosSemana, ingresosMes } = calcularIngresosPorPeriodo();
+      ingresosTotalesEl.textContent = `$${ingresosHoy.toLocaleString()} / $${ingresosSemana.toLocaleString()} / $${ingresosMes.toLocaleString()}`;
+
+      const hoy = new Date();
+      const tresDiasDespues = new Date();
+      tresDiasDespues.setDate(hoy.getDate() + 3);
+
+      ventasPorVencer = ventas.filter((v) => {
+        const venc = new Date(v.fechaVencimiento);
+        return venc >= hoy && venc <= tresDiasDespues && !v.esRevendedor;
+      });
+      cuentasPorVencerEl.textContent = ventasPorVencer.length;
+
+      ventasPorVencerRevendedores = ventas.filter((v) => {
+        const venc = new Date(v.fechaVencimiento);
+        return venc >= hoy && venc <= tresDiasDespues && v.esRevendedor;
+      });
+      cuentasPorVencerRevendedoresEl.textContent = ventasPorVencerRevendedores.length;
+
+      // Mostrar cuentas próximas a vencer clientes
+      vencimientosProximosEl.innerHTML = "";
+      if (ventasPorVencer.length === 0) {
+        vencimientosProximosEl.innerHTML = `<p class="text-sm text-gray-500 italic">No hay cuentas próximas a vencer.</p>`;
+      } else {
+        ventasPorVencer.forEach((v) => {
+          const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+          const telLink = v.telefono
+            ? `<a href="https://wa.me/${v.telefono.replace(/\D/g, '')}" target="_blank" rel="noopener noreferrer" class="text-green-600 hover:underline">WhatsApp</a>`
+            : "";
+          vencimientosProximosEl.innerHTML += `
+            <div class="border border-red-300 rounded p-2 bg-red-50 flex justify-between items-center text-sm">
+              <div>
+                <p><strong>${v.cliente}</strong> - ${v.plataforma} - ${v.pantalla}</p>
+                <p>Vence: ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""})</p>
+              </div>
+              <div>${telLink}</div>
+            </div>
+          `;
+        });
+      }
+
+      // Mostrar cuentas próximas a vencer revendedores
+      vencimientosProximosRevendedoresEl.innerHTML = "";
+      if (ventasPorVencerRevendedores.length === 0) {
+        vencimientosProximosRevendedoresEl.innerHTML = `<p class="text-sm text-gray-500 italic">No hay revendedores próximos a vencer.</p>`;
+      } else {
+        ventasPorVencerRevendedores.forEach((v) => {
+          const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+          const telLink = v.telefono
+            ? `<a href="https://wa.me/${v.telefono.replace(/\D/g, '')}" target="_blank" rel="noopener noreferrer" class="text-purple-600 hover:underline">WhatsApp</a>`
+            : "";
+          vencimientosProximosRevendedoresEl.innerHTML += `
+            <div class="border border-purple-300 rounded p-2 bg-purple-50 flex justify-between items-center text-sm">
+              <div>
+                <p><strong>${v.cliente}</strong> - ${v.plataforma} - ${v.pantalla}</p>
+                <p>Vence: ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""})</p>
+              </div>
+              <div>${telLink}</div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function agruparVentasPorCliente() {
+      // Agrupa ventas por cliente (nombre o teléfono)
+      const agrupado = {};
+      ventas.forEach((v) => {
+        const key = v.telefono ? v.telefono.trim() : v.cliente.trim().toLowerCase();
+        if (!agrupado[key]) agrupado[key] = [];
+        agrupado[key].push(v);
+      });
+      return agrupado;
+    }
+
+    function renderTablaVentas() {
+      tablaVentas.innerHTML = "";
+      if (ventas.length === 0) {
+        sinVentas.style.display = "block";
+        return;
+      }
+      sinVentas.style.display = "none";
+
+      // Agrupar ventas por cliente para mostrar agrupado
+      const agrupado = agruparVentasPorCliente();
+
+      Object.values(agrupado).forEach((ventasCliente) => {
+        // Mostrar cliente y teléfono en fila principal
+        const cliente = ventasCliente[0].cliente;
+        const telefono = ventasCliente[0].telefono || "-";
+
+        // Crear fila agrupada con cliente y teléfono, spanning columns
+        const trCliente = document.createElement("tr");
+        trCliente.className = "bg-gray-200 font-semibold cursor-pointer mac-window";
+        trCliente.innerHTML = `
+          <td class="p-2 border border-gray-300" colspan="2">${cliente}</td>
+          <td class="p-2 border border-gray-300" colspan="7">${telefono}</td>
+        `;
+        tablaVentas.appendChild(trCliente);
+
+        // Crear filas para cada cuenta de ese cliente, ocultas inicialmente
+        ventasCliente.forEach((v) => {
+          const fechaVenta = formatDate(v.fechaVenta);
+          const fechaVenc = formatDate(v.fechaVencimiento);
+          const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+          const diasRestantesText = diasRestantes < 0 ? "Vencido" : diasRestantes;
+
+          const trCuenta = document.createElement("tr");
+          trCuenta.className = "hover:bg-gray-100 hidden mac-window";
+          trCuenta.innerHTML = `
+            <td class="p-2 border border-gray-300">${v.plataforma}</td>
+            <td class="p-2 border border-gray-300">${v.pantalla}</td>
+            <td class="p-2 border border-gray-300 text-right">$${v.precio.toLocaleString()}</td>
+            <td class="p-2 border border-gray-300">${fechaVenta}</td>
+            <td class="p-2 border border-gray-300">${fechaVenc}</td>
+            <td class="p-2 border border-gray-300 text-center ${diasRestantes < 0 ? "text-red-600 font-bold" : ""}">${diasRestantesText}</td>
+            <td class="p-2 border border-gray-300 text-center space-x-1">
+              <button title="Editar" data-id="${v.id}" class="editarVenta text-blue-600 hover:text-blue-800 mac-window" type="button"><i class="fas fa-edit"></i></button>
+              <button title="Eliminar" data-id="${v.id}" class="eliminarVenta text-red-600 hover:text-red-800 mac-window" type="button"><i class="fas fa-trash-alt"></i></button>
+              <button title="Agregar Cuenta" data-cliente="${v.cliente}" data-telefono="${v.telefono}" class="agregarCuenta text-green-600 hover:text-green-800 mac-window" type="button"><i class="fas fa-plus-circle"></i></button>
+              ${
+                v.telefono
+                  ? `<button title="Enviar WhatsApp" data-id="${v.id}" class="whatsappVenta text-green-600 hover:text-green-800 mac-window" type="button"><i class="fab fa-whatsapp"></i></button>`
+                  : ""
+              }
+            </td>
+          `;
+          tablaVentas.appendChild(trCuenta);
+        });
+
+        // Añadir toggle para mostrar/ocultar cuentas al hacer click en fila cliente
+        trCliente.addEventListener("click", () => {
+          let next = trCliente.nextElementSibling;
+          while (next && !next.classList.contains("bg-gray-200")) {
+            next.classList.toggle("hidden");
+            next = next.nextElementSibling;
+          }
+        });
+      });
+
+      // Añadir listeners botones editar, eliminar, whatsapp, agregar cuenta
+      document.querySelectorAll(".editarVenta").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.dataset.id;
+          abrirModalEditar(id);
+        })
+      );
+      document.querySelectorAll(".eliminarVenta").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.dataset.id;
+          eliminarVenta(id);
+        })
+      );
+      document.querySelectorAll(".whatsappVenta").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const id = e.currentTarget.dataset.id;
+          enviarWhatsApp(id);
+        })
+      );
+      document.querySelectorAll(".agregarCuenta").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const cliente = e.currentTarget.dataset.cliente;
+          const telefono = e.currentTarget.dataset.telefono;
+          abrirFormularioAgregarCuenta(cliente, telefono);
+        })
+      );
+    }
+
+    // Abrir formulario para agregar cuenta a cliente existente
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Actualizar precio al cambiar plataforma o pantalla en formulario registro
+    function actualizarPrecioDefault() {
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precioDefault = precios[plataforma][pantalla];
+      precioInput.value = precioDefault;
+    }
+
+    // Actualizar precio en modal editar
+    function actualizarPrecioDefaultEditar() {
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precioDefault = precios[plataforma][pantalla];
+      editPrecio.value = precioDefault;
+    }
+
+    // Al cambiar plataforma o pantalla en registro
+    plataformaSelect.addEventListener("change", actualizarPrecioDefault);
+    pantallaSelect.addEventListener("change", actualizarPrecioDefault);
+
+    // Al cambiar plataforma o pantalla en editar
+    editPlataforma.addEventListener("change", actualizarPrecioDefaultEditar);
+    editPantalla.addEventListener("change", actualizarPrecioDefaultEditar);
+
+    // Al cargar la página, setear precio y fecha vencimiento por defecto
+    function setDefaults() {
+      actualizarPrecioDefault();
+      const hoy = new Date();
+      const venc = new Date(hoy);
+      venc.setDate(hoy.getDate() + 30);
+      fechaVencimientoInput.value = venc.toISOString().split("T")[0];
+    }
+    setDefaults();
+
+    // Enviar WhatsApp automático toggle
+    whatsappAutoCheckbox.addEventListener("change", () => {
+      whatsappAuto = whatsappAutoCheckbox.checked;
+    });
+
+    // Generar ID único simple
+    function generarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    // Registrar venta
+    ventaForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const cliente = clienteNombreInput.value.trim();
+      const telefonoRaw = clienteTelefonoInput.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precio = parseFloat(precioInput.value);
+      const fechaVencimiento = fechaVencimientoInput.value;
+      const fechaVenta = new Date().toISOString();
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      // Crear nueva venta
+      const nuevaVenta = {
+        id: generarId(),
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+        fechaVenta,
+        esRevendedor: esVentaRevendedor,
+      };
+
+      ventas.push(nuevaVenta);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      // Limpiar formulario y resetear precio y fecha
+      ventaForm.reset();
+      setDefaults();
+
+      // Ocultar formulario
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+
+      // Enviar WhatsApp automático si activado y teléfono existe
+      if (whatsappAuto && telefono) {
+        enviarWhatsApp(nuevaVenta.id);
+      }
+    });
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      editarId = id;
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta) return;
+
+      editClienteNombre.value = venta.cliente;
+      editClienteTelefono.value = venta.telefono;
+      editPlataforma.value = venta.plataforma;
+      editPantalla.value = venta.pantalla;
+      editPrecio.value = venta.precio;
+      editFechaVencimiento.value = venta.fechaVencimiento;
+
+      modalEditar.classList.remove("hidden");
+      modalEditar.setAttribute("aria-hidden", "false");
+      editClienteNombre.focus();
+    }
+
+    // Cerrar modal editar
+    cerrarModalBtn.addEventListener("click", () => {
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Guardar cambios editar
+    formEditar.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editarId) return;
+
+      const cliente = editClienteNombre.value.trim();
+      const telefonoRaw = editClienteTelefono.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precio = parseFloat(editPrecio.value);
+      const fechaVencimiento = editFechaVencimiento.value;
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      const index = ventas.findIndex((v) => v.id === editarId);
+      if (index === -1) return;
+
+      ventas[index] = {
+        ...ventas[index],
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+      };
+
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Eliminar venta
+    function eliminarVenta(id) {
+      if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+      ventas = ventas.filter((v) => v.id !== id);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+      if (editarId === id) {
+        modalEditar.classList.add("hidden");
+        modalEditar.setAttribute("aria-hidden", "true");
+        editarId = null;
+      }
+    }
+
+    btnEliminarVenta.addEventListener("click", () => {
+      if (editarId) eliminarVenta(editarId);
+    });
+
+    // Enviar WhatsApp
+    function enviarWhatsApp(id) {
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta || !venta.telefono) return;
+
+      const diasRestantes = daysBetween(new Date(), new Date(venta.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${venta.cliente},\n` +
+          `Tu cuenta de ${venta.plataforma} (${venta.pantalla}) vence el ${formatDate(
+            venta.fechaVencimiento
+          )} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes).\n` +
+          `Precio: $${venta.precio.toLocaleString()}\n` +
+          `Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${venta.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    }
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Mostrar modal WhatsApp cuentas por vencer
+    cuentasPorVencerContainer.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+
+      contenidoWhatsApp.innerHTML = "";
+      ventasPorVencer.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsApp.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppIndividual bg-green-600 hover:bg-green-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsApp.classList.remove("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsApp.focus();
+    });
+
+    // Mostrar modal WhatsApp revendedores por vencer
+    cuentasPorVencerRevendedoresContainer.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+
+      contenidoWhatsAppRevendedores.innerHTML = "";
+      ventasPorVencerRevendedores.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsAppRevendedores.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppRevendedorIndividual bg-purple-600 hover:bg-purple-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a revendedor ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsAppRevendedores.classList.remove("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsAppRevendedores.focus();
+    });
+
+    // Cerrar modal WhatsApp
+    function cerrarModalWhatsApp() {
+      modalWhatsApp.classList.add("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppBtn.addEventListener("click", cerrarModalWhatsApp);
+    btnCerrarWhatsApp.addEventListener("click", cerrarModalWhatsApp);
+
+    // Cerrar modal WhatsApp revendedores
+    function cerrarModalWhatsAppRevendedores() {
+      modalWhatsAppRevendedores.classList.add("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppRevendedoresBtn.addEventListener("click", cerrarModalWhatsAppRevendedores);
+    btnCerrarWhatsAppRevendedores.addEventListener("click", cerrarModalWhatsAppRevendedores);
+
+    // Enviar WhatsApp desde modal cuentas por vencer (botones individuales)
+    contenidoWhatsApp.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal revendedores por vencer (botones individuales)
+    contenidoWhatsAppRevendedores.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppRevendedorIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppRevendedorIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal botón general (envía al primer cliente listado)
+    btnEnviarWhatsAppModal.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+      const v = ventasPorVencer[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Enviar WhatsApp desde modal revendedores botón general (envía al primer revendedor listado)
+    btnEnviarWhatsAppModalRevendedores.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+      const v = ventasPorVencerRevendedores[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Agregar cuenta para cliente existente
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".agregarCuenta")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".agregarCuenta");
+        const cliente = btn.dataset.cliente;
+        const telefono = btn.dataset.telefono;
+        abrirFormularioAgregarCuenta(cliente, telefono);
+      }
+    });
+
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Actualizar precio al cambiar plataforma o pantalla en formulario registro
+    function actualizarPrecioDefault() {
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precioDefault = precios[plataforma][pantalla];
+      precioInput.value = precioDefault;
+    }
+
+    // Actualizar precio en modal editar
+    function actualizarPrecioDefaultEditar() {
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precioDefault = precios[plataforma][pantalla];
+      editPrecio.value = precioDefault;
+    }
+
+    // Al cambiar plataforma o pantalla en registro
+    plataformaSelect.addEventListener("change", actualizarPrecioDefault);
+    pantallaSelect.addEventListener("change", actualizarPrecioDefault);
+
+    // Al cambiar plataforma o pantalla en editar
+    editPlataforma.addEventListener("change", actualizarPrecioDefaultEditar);
+    editPantalla.addEventListener("change", actualizarPrecioDefaultEditar);
+
+    // Al cargar la página, setear precio y fecha vencimiento por defecto
+    function setDefaults() {
+      actualizarPrecioDefault();
+      const hoy = new Date();
+      const venc = new Date(hoy);
+      venc.setDate(hoy.getDate() + 30);
+      fechaVencimientoInput.value = venc.toISOString().split("T")[0];
+    }
+    setDefaults();
+
+    // Enviar WhatsApp automático toggle
+    whatsappAutoCheckbox.addEventListener("change", () => {
+      whatsappAuto = whatsappAutoCheckbox.checked;
+    });
+
+    // Generar ID único simple
+    function generarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    // Registrar venta
+    ventaForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const cliente = clienteNombreInput.value.trim();
+      const telefonoRaw = clienteTelefonoInput.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precio = parseFloat(precioInput.value);
+      const fechaVencimiento = fechaVencimientoInput.value;
+      const fechaVenta = new Date().toISOString();
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      // Crear nueva venta
+      const nuevaVenta = {
+        id: generarId(),
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+        fechaVenta,
+        esRevendedor: esVentaRevendedor,
+      };
+
+      ventas.push(nuevaVenta);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      // Limpiar formulario y resetear precio y fecha
+      ventaForm.reset();
+      setDefaults();
+
+      // Ocultar formulario
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+
+      // Enviar WhatsApp automático si activado y teléfono existe
+      if (whatsappAuto && telefono) {
+        enviarWhatsApp(nuevaVenta.id);
+      }
+    });
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      editarId = id;
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta) return;
+
+      editClienteNombre.value = venta.cliente;
+      editClienteTelefono.value = venta.telefono;
+      editPlataforma.value = venta.plataforma;
+      editPantalla.value = venta.pantalla;
+      editPrecio.value = venta.precio;
+      editFechaVencimiento.value = venta.fechaVencimiento;
+
+      modalEditar.classList.remove("hidden");
+      modalEditar.setAttribute("aria-hidden", "false");
+      editClienteNombre.focus();
+    }
+
+    // Cerrar modal editar
+    cerrarModalBtn.addEventListener("click", () => {
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Guardar cambios editar
+    formEditar.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editarId) return;
+
+      const cliente = editClienteNombre.value.trim();
+      const telefonoRaw = editClienteTelefono.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precio = parseFloat(editPrecio.value);
+      const fechaVencimiento = editFechaVencimiento.value;
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      const index = ventas.findIndex((v) => v.id === editarId);
+      if (index === -1) return;
+
+      ventas[index] = {
+        ...ventas[index],
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+      };
+
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Eliminar venta
+    function eliminarVenta(id) {
+      if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+      ventas = ventas.filter((v) => v.id !== id);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+      if (editarId === id) {
+        modalEditar.classList.add("hidden");
+        modalEditar.setAttribute("aria-hidden", "true");
+        editarId = null;
+      }
+    }
+
+    btnEliminarVenta.addEventListener("click", () => {
+      if (editarId) eliminarVenta(editarId);
+    });
+
+    // Enviar WhatsApp
+    function enviarWhatsApp(id) {
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta || !venta.telefono) return;
+
+      const diasRestantes = daysBetween(new Date(), new Date(venta.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${venta.cliente},\n` +
+          `Tu cuenta de ${venta.plataforma} (${venta.pantalla}) vence el ${formatDate(
+            venta.fechaVencimiento
+          )} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes).\n` +
+          `Precio: $${venta.precio.toLocaleString()}\n` +
+          `Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${venta.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    }
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Mostrar modal WhatsApp cuentas por vencer
+    cuentasPorVencerContainer.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+
+      contenidoWhatsApp.innerHTML = "";
+      ventasPorVencer.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsApp.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppIndividual bg-green-600 hover:bg-green-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsApp.classList.remove("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsApp.focus();
+    });
+
+    // Mostrar modal WhatsApp revendedores por vencer
+    cuentasPorVencerRevendedoresContainer.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+
+      contenidoWhatsAppRevendedores.innerHTML = "";
+      ventasPorVencerRevendedores.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsAppRevendedores.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppRevendedorIndividual bg-purple-600 hover:bg-purple-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a revendedor ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsAppRevendedores.classList.remove("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsAppRevendedores.focus();
+    });
+
+    // Cerrar modal WhatsApp
+    function cerrarModalWhatsApp() {
+      modalWhatsApp.classList.add("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppBtn.addEventListener("click", cerrarModalWhatsApp);
+    btnCerrarWhatsApp.addEventListener("click", cerrarModalWhatsApp);
+
+    // Cerrar modal WhatsApp revendedores
+    function cerrarModalWhatsAppRevendedores() {
+      modalWhatsAppRevendedores.classList.add("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppRevendedoresBtn.addEventListener("click", cerrarModalWhatsAppRevendedores);
+    btnCerrarWhatsAppRevendedores.addEventListener("click", cerrarModalWhatsAppRevendedores);
+
+    // Enviar WhatsApp desde modal cuentas por vencer (botones individuales)
+    contenidoWhatsApp.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal revendedores por vencer (botones individuales)
+    contenidoWhatsAppRevendedores.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppRevendedorIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppRevendedorIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal botón general (envía al primer cliente listado)
+    btnEnviarWhatsAppModal.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+      const v = ventasPorVencer[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Enviar WhatsApp desde modal revendedores botón general (envía al primer revendedor listado)
+    btnEnviarWhatsAppModalRevendedores.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+      const v = ventasPorVencerRevendedores[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Agregar cuenta para cliente existente
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".agregarCuenta")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".agregarCuenta");
+        const cliente = btn.dataset.cliente;
+        const telefono = btn.dataset.telefono;
+        abrirFormularioAgregarCuenta(cliente, telefono);
+      }
+    });
+
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Actualizar precio al cambiar plataforma o pantalla en formulario registro
+    function actualizarPrecioDefault() {
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precioDefault = precios[plataforma][pantalla];
+      precioInput.value = precioDefault;
+    }
+
+    // Actualizar precio en modal editar
+    function actualizarPrecioDefaultEditar() {
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precioDefault = precios[plataforma][pantalla];
+      editPrecio.value = precioDefault;
+    }
+
+    // Al cambiar plataforma o pantalla en registro
+    plataformaSelect.addEventListener("change", actualizarPrecioDefault);
+    pantallaSelect.addEventListener("change", actualizarPrecioDefault);
+
+    // Al cambiar plataforma o pantalla en editar
+    editPlataforma.addEventListener("change", actualizarPrecioDefaultEditar);
+    editPantalla.addEventListener("change", actualizarPrecioDefaultEditar);
+
+    // Al cargar la página, setear precio y fecha vencimiento por defecto
+    function setDefaults() {
+      actualizarPrecioDefault();
+      const hoy = new Date();
+      const venc = new Date(hoy);
+      venc.setDate(hoy.getDate() + 30);
+      fechaVencimientoInput.value = venc.toISOString().split("T")[0];
+    }
+    setDefaults();
+
+    // Enviar WhatsApp automático toggle
+    whatsappAutoCheckbox.addEventListener("change", () => {
+      whatsappAuto = whatsappAutoCheckbox.checked;
+    });
+
+    // Generar ID único simple
+    function generarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    // Registrar venta
+    ventaForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const cliente = clienteNombreInput.value.trim();
+      const telefonoRaw = clienteTelefonoInput.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precio = parseFloat(precioInput.value);
+      const fechaVencimiento = fechaVencimientoInput.value;
+      const fechaVenta = new Date().toISOString();
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      // Crear nueva venta
+      const nuevaVenta = {
+        id: generarId(),
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+        fechaVenta,
+        esRevendedor: esVentaRevendedor,
+      };
+
+      ventas.push(nuevaVenta);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      // Limpiar formulario y resetear precio y fecha
+      ventaForm.reset();
+      setDefaults();
+
+      // Ocultar formulario
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+
+      // Enviar WhatsApp automático si activado y teléfono existe
+      if (whatsappAuto && telefono) {
+        enviarWhatsApp(nuevaVenta.id);
+      }
+    });
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      editarId = id;
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta) return;
+
+      editClienteNombre.value = venta.cliente;
+      editClienteTelefono.value = venta.telefono;
+      editPlataforma.value = venta.plataforma;
+      editPantalla.value = venta.pantalla;
+      editPrecio.value = venta.precio;
+      editFechaVencimiento.value = venta.fechaVencimiento;
+
+      modalEditar.classList.remove("hidden");
+      modalEditar.setAttribute("aria-hidden", "false");
+      editClienteNombre.focus();
+    }
+
+    // Cerrar modal editar
+    cerrarModalBtn.addEventListener("click", () => {
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Guardar cambios editar
+    formEditar.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editarId) return;
+
+      const cliente = editClienteNombre.value.trim();
+      const telefonoRaw = editClienteTelefono.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precio = parseFloat(editPrecio.value);
+      const fechaVencimiento = editFechaVencimiento.value;
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      const index = ventas.findIndex((v) => v.id === editarId);
+      if (index === -1) return;
+
+      ventas[index] = {
+        ...ventas[index],
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+      };
+
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Eliminar venta
+    function eliminarVenta(id) {
+      if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+      ventas = ventas.filter((v) => v.id !== id);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+      if (editarId === id) {
+        modalEditar.classList.add("hidden");
+        modalEditar.setAttribute("aria-hidden", "true");
+        editarId = null;
+      }
+    }
+
+    btnEliminarVenta.addEventListener("click", () => {
+      if (editarId) eliminarVenta(editarId);
+    });
+
+    // Enviar WhatsApp
+    function enviarWhatsApp(id) {
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta || !venta.telefono) return;
+
+      const diasRestantes = daysBetween(new Date(), new Date(venta.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${venta.cliente},\n` +
+          `Tu cuenta de ${venta.plataforma} (${venta.pantalla}) vence el ${formatDate(
+            venta.fechaVencimiento
+          )} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes).\n` +
+          `Precio: $${venta.precio.toLocaleString()}\n` +
+          `Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${venta.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    }
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Mostrar modal WhatsApp cuentas por vencer
+    cuentasPorVencerContainer.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+
+      contenidoWhatsApp.innerHTML = "";
+      ventasPorVencer.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsApp.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppIndividual bg-green-600 hover:bg-green-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsApp.classList.remove("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsApp.focus();
+    });
+
+    // Mostrar modal WhatsApp revendedores por vencer
+    cuentasPorVencerRevendedoresContainer.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+
+      contenidoWhatsAppRevendedores.innerHTML = "";
+      ventasPorVencerRevendedores.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsAppRevendedores.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppRevendedorIndividual bg-purple-600 hover:bg-purple-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a revendedor ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsAppRevendedores.classList.remove("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsAppRevendedores.focus();
+    });
+
+    // Cerrar modal WhatsApp
+    function cerrarModalWhatsApp() {
+      modalWhatsApp.classList.add("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppBtn.addEventListener("click", cerrarModalWhatsApp);
+    btnCerrarWhatsApp.addEventListener("click", cerrarModalWhatsApp);
+
+    // Cerrar modal WhatsApp revendedores
+    function cerrarModalWhatsAppRevendedores() {
+      modalWhatsAppRevendedores.classList.add("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppRevendedoresBtn.addEventListener("click", cerrarModalWhatsAppRevendedores);
+    btnCerrarWhatsAppRevendedores.addEventListener("click", cerrarModalWhatsAppRevendedores);
+
+    // Enviar WhatsApp desde modal cuentas por vencer (botones individuales)
+    contenidoWhatsApp.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal revendedores por vencer (botones individuales)
+    contenidoWhatsAppRevendedores.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppRevendedorIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppRevendedorIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal botón general (envía al primer cliente listado)
+    btnEnviarWhatsAppModal.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+      const v = ventasPorVencer[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Enviar WhatsApp desde modal revendedores botón general (envía al primer revendedor listado)
+    btnEnviarWhatsAppModalRevendedores.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+      const v = ventasPorVencerRevendedores[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Agregar cuenta para cliente existente
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".agregarCuenta")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".agregarCuenta");
+        const cliente = btn.dataset.cliente;
+        const telefono = btn.dataset.telefono;
+        abrirFormularioAgregarCuenta(cliente, telefono);
+      }
+    });
+
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Actualizar precio al cambiar plataforma o pantalla en formulario registro
+    function actualizarPrecioDefault() {
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precioDefault = precios[plataforma][pantalla];
+      precioInput.value = precioDefault;
+    }
+
+    // Actualizar precio en modal editar
+    function actualizarPrecioDefaultEditar() {
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precioDefault = precios[plataforma][pantalla];
+      editPrecio.value = precioDefault;
+    }
+
+    // Al cambiar plataforma o pantalla en registro
+    plataformaSelect.addEventListener("change", actualizarPrecioDefault);
+    pantallaSelect.addEventListener("change", actualizarPrecioDefault);
+
+    // Al cambiar plataforma o pantalla en editar
+    editPlataforma.addEventListener("change", actualizarPrecioDefaultEditar);
+    editPantalla.addEventListener("change", actualizarPrecioDefaultEditar);
+
+    // Al cargar la página, setear precio y fecha vencimiento por defecto
+    function setDefaults() {
+      actualizarPrecioDefault();
+      const hoy = new Date();
+      const venc = new Date(hoy);
+      venc.setDate(hoy.getDate() + 30);
+      fechaVencimientoInput.value = venc.toISOString().split("T")[0];
+    }
+    setDefaults();
+
+    // Enviar WhatsApp automático toggle
+    whatsappAutoCheckbox.addEventListener("change", () => {
+      whatsappAuto = whatsappAutoCheckbox.checked;
+    });
+
+    // Generar ID único simple
+    function generarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    // Registrar venta
+    ventaForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const cliente = clienteNombreInput.value.trim();
+      const telefonoRaw = clienteTelefonoInput.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precio = parseFloat(precioInput.value);
+      const fechaVencimiento = fechaVencimientoInput.value;
+      const fechaVenta = new Date().toISOString();
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      // Crear nueva venta
+      const nuevaVenta = {
+        id: generarId(),
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+        fechaVenta,
+        esRevendedor: esVentaRevendedor,
+      };
+
+      ventas.push(nuevaVenta);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      // Limpiar formulario y resetear precio y fecha
+      ventaForm.reset();
+      setDefaults();
+
+      // Ocultar formulario
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+
+      // Enviar WhatsApp automático si activado y teléfono existe
+      if (whatsappAuto && telefono) {
+        enviarWhatsApp(nuevaVenta.id);
+      }
+    });
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      editarId = id;
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta) return;
+
+      editClienteNombre.value = venta.cliente;
+      editClienteTelefono.value = venta.telefono;
+      editPlataforma.value = venta.plataforma;
+      editPantalla.value = venta.pantalla;
+      editPrecio.value = venta.precio;
+      editFechaVencimiento.value = venta.fechaVencimiento;
+
+      modalEditar.classList.remove("hidden");
+      modalEditar.setAttribute("aria-hidden", "false");
+      editClienteNombre.focus();
+    }
+
+    // Cerrar modal editar
+    cerrarModalBtn.addEventListener("click", () => {
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Guardar cambios editar
+    formEditar.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editarId) return;
+
+      const cliente = editClienteNombre.value.trim();
+      const telefonoRaw = editClienteTelefono.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precio = parseFloat(editPrecio.value);
+      const fechaVencimiento = editFechaVencimiento.value;
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      const index = ventas.findIndex((v) => v.id === editarId);
+      if (index === -1) return;
+
+      ventas[index] = {
+        ...ventas[index],
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+      };
+
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Eliminar venta
+    function eliminarVenta(id) {
+      if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+      ventas = ventas.filter((v) => v.id !== id);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+      if (editarId === id) {
+        modalEditar.classList.add("hidden");
+        modalEditar.setAttribute("aria-hidden", "true");
+        editarId = null;
+      }
+    }
+
+    btnEliminarVenta.addEventListener("click", () => {
+      if (editarId) eliminarVenta(editarId);
+    });
+
+    // Enviar WhatsApp
+    function enviarWhatsApp(id) {
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta || !venta.telefono) return;
+
+      const diasRestantes = daysBetween(new Date(), new Date(venta.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${venta.cliente},\n` +
+          `Tu cuenta de ${venta.plataforma} (${venta.pantalla}) vence el ${formatDate(
+            venta.fechaVencimiento
+          )} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes).\n` +
+          `Precio: $${venta.precio.toLocaleString()}\n` +
+          `Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${venta.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    }
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Mostrar modal WhatsApp cuentas por vencer
+    cuentasPorVencerContainer.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+
+      contenidoWhatsApp.innerHTML = "";
+      ventasPorVencer.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsApp.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppIndividual bg-green-600 hover:bg-green-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsApp.classList.remove("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsApp.focus();
+    });
+
+    // Mostrar modal WhatsApp revendedores por vencer
+    cuentasPorVencerRevendedoresContainer.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+
+      contenidoWhatsAppRevendedores.innerHTML = "";
+      ventasPorVencerRevendedores.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsAppRevendedores.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppRevendedorIndividual bg-purple-600 hover:bg-purple-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a revendedor ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsAppRevendedores.classList.remove("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsAppRevendedores.focus();
+    });
+
+    // Cerrar modal WhatsApp
+    function cerrarModalWhatsApp() {
+      modalWhatsApp.classList.add("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppBtn.addEventListener("click", cerrarModalWhatsApp);
+    btnCerrarWhatsApp.addEventListener("click", cerrarModalWhatsApp);
+
+    // Cerrar modal WhatsApp revendedores
+    function cerrarModalWhatsAppRevendedores() {
+      modalWhatsAppRevendedores.classList.add("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppRevendedoresBtn.addEventListener("click", cerrarModalWhatsAppRevendedores);
+    btnCerrarWhatsAppRevendedores.addEventListener("click", cerrarModalWhatsAppRevendedores);
+
+    // Enviar WhatsApp desde modal cuentas por vencer (botones individuales)
+    contenidoWhatsApp.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal revendedores por vencer (botones individuales)
+    contenidoWhatsAppRevendedores.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppRevendedorIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppRevendedorIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal botón general (envía al primer cliente listado)
+    btnEnviarWhatsAppModal.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+      const v = ventasPorVencer[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Enviar WhatsApp desde modal revendedores botón general (envía al primer revendedor listado)
+    btnEnviarWhatsAppModalRevendedores.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+      const v = ventasPorVencerRevendedores[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Agregar cuenta para cliente existente
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".agregarCuenta")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".agregarCuenta");
+        const cliente = btn.dataset.cliente;
+        const telefono = btn.dataset.telefono;
+        abrirFormularioAgregarCuenta(cliente, telefono);
+      }
+    });
+
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Actualizar precio al cambiar plataforma o pantalla en formulario registro
+    function actualizarPrecioDefault() {
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precioDefault = precios[plataforma][pantalla];
+      precioInput.value = precioDefault;
+    }
+
+    // Actualizar precio en modal editar
+    function actualizarPrecioDefaultEditar() {
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precioDefault = precios[plataforma][pantalla];
+      editPrecio.value = precioDefault;
+    }
+
+    // Al cambiar plataforma o pantalla en registro
+    plataformaSelect.addEventListener("change", actualizarPrecioDefault);
+    pantallaSelect.addEventListener("change", actualizarPrecioDefault);
+
+    // Al cambiar plataforma o pantalla en editar
+    editPlataforma.addEventListener("change", actualizarPrecioDefaultEditar);
+    editPantalla.addEventListener("change", actualizarPrecioDefaultEditar);
+
+    // Al cargar la página, setear precio y fecha vencimiento por defecto
+    function setDefaults() {
+      actualizarPrecioDefault();
+      const hoy = new Date();
+      const venc = new Date(hoy);
+      venc.setDate(hoy.getDate() + 30);
+      fechaVencimientoInput.value = venc.toISOString().split("T")[0];
+    }
+    setDefaults();
+
+    // Enviar WhatsApp automático toggle
+    whatsappAutoCheckbox.addEventListener("change", () => {
+      whatsappAuto = whatsappAutoCheckbox.checked;
+    });
+
+    // Generar ID único simple
+    function generarId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+
+    // Registrar venta
+    ventaForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const cliente = clienteNombreInput.value.trim();
+      const telefonoRaw = clienteTelefonoInput.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = plataformaSelect.value;
+      const pantalla = pantallaSelect.value;
+      const precio = parseFloat(precioInput.value);
+      const fechaVencimiento = fechaVencimientoInput.value;
+      const fechaVenta = new Date().toISOString();
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      // Crear nueva venta
+      const nuevaVenta = {
+        id: generarId(),
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+        fechaVenta,
+        esRevendedor: esVentaRevendedor,
+      };
+
+      ventas.push(nuevaVenta);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      // Limpiar formulario y resetear precio y fecha
+      ventaForm.reset();
+      setDefaults();
+
+      // Ocultar formulario
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+
+      // Enviar WhatsApp automático si activado y teléfono existe
+      if (whatsappAuto && telefono) {
+        enviarWhatsApp(nuevaVenta.id);
+      }
+    });
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      editarId = id;
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta) return;
+
+      editClienteNombre.value = venta.cliente;
+      editClienteTelefono.value = venta.telefono;
+      editPlataforma.value = venta.plataforma;
+      editPantalla.value = venta.pantalla;
+      editPrecio.value = venta.precio;
+      editFechaVencimiento.value = venta.fechaVencimiento;
+
+      modalEditar.classList.remove("hidden");
+      modalEditar.setAttribute("aria-hidden", "false");
+      editClienteNombre.focus();
+    }
+
+    // Cerrar modal editar
+    cerrarModalBtn.addEventListener("click", () => {
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Guardar cambios editar
+    formEditar.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!editarId) return;
+
+      const cliente = editClienteNombre.value.trim();
+      const telefonoRaw = editClienteTelefono.value.trim();
+      const telefono = telefonoRaw ? telefonoRaw.replace(/\D/g, "") : "";
+      const plataforma = editPlataforma.value;
+      const pantalla = editPantalla.value;
+      const precio = parseFloat(editPrecio.value);
+      const fechaVencimiento = editFechaVencimiento.value;
+
+      if (!cliente) {
+        alert("El nombre es obligatorio.");
+        return;
+      }
+      if (!fechaVencimiento) {
+        alert("La fecha de vencimiento es obligatoria.");
+        return;
+      }
+      if (isNaN(precio) || precio <= 0) {
+        alert("El precio debe ser un número positivo.");
+        return;
+      }
+
+      const index = ventas.findIndex((v) => v.id === editarId);
+      if (index === -1) return;
+
+      ventas[index] = {
+        ...ventas[index],
+        cliente,
+        telefono,
+        plataforma,
+        pantalla,
+        precio,
+        fechaVencimiento,
+      };
+
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+
+      modalEditar.classList.add("hidden");
+      modalEditar.setAttribute("aria-hidden", "true");
+      editarId = null;
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Eliminar venta
+    function eliminarVenta(id) {
+      if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+      ventas = ventas.filter((v) => v.id !== id);
+      saveVentas();
+      actualizarEstadisticas();
+      renderTablaVentas();
+      if (editarId === id) {
+        modalEditar.classList.add("hidden");
+        modalEditar.setAttribute("aria-hidden", "true");
+        editarId = null;
+      }
+    }
+
+    btnEliminarVenta.addEventListener("click", () => {
+      if (editarId) eliminarVenta(editarId);
+    });
+
+    // Enviar WhatsApp
+    function enviarWhatsApp(id) {
+      const venta = ventas.find((v) => v.id === id);
+      if (!venta || !venta.telefono) return;
+
+      const diasRestantes = daysBetween(new Date(), new Date(venta.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${venta.cliente},\n` +
+          `Tu cuenta de ${venta.plataforma} (${venta.pantalla}) vence el ${formatDate(
+            venta.fechaVencimiento
+          )} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes).\n` +
+          `Precio: $${venta.precio.toLocaleString()}\n` +
+          `Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${venta.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    }
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Mostrar modal WhatsApp cuentas por vencer
+    cuentasPorVencerContainer.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+
+      contenidoWhatsApp.innerHTML = "";
+      ventasPorVencer.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsApp.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppIndividual bg-green-600 hover:bg-green-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsApp.classList.remove("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsApp.focus();
+    });
+
+    // Mostrar modal WhatsApp revendedores por vencer
+    cuentasPorVencerRevendedoresContainer.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+
+      contenidoWhatsAppRevendedores.innerHTML = "";
+      ventasPorVencerRevendedores.forEach((v) => {
+        const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+        const mensaje = `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`;
+        contenidoWhatsAppRevendedores.innerHTML += `
+          <div class="border rounded p-3 flex items-center justify-between gap-4">
+            <div>
+              <p class="font-semibold">${v.cliente}</p>
+              <p class="text-xs text-gray-600">${mensaje}</p>
+            </div>
+            <button class="btnEnviarWhatsAppRevendedorIndividual bg-purple-600 hover:bg-purple-700 text-white rounded p-2" data-telefono="${v.telefono}" data-mensaje="${encodeURIComponent(mensaje)}" aria-label="Enviar WhatsApp a revendedor ${v.cliente}">
+              <i class="fab fa-whatsapp text-lg"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      modalWhatsAppRevendedores.classList.remove("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "false");
+      btnCerrarWhatsAppRevendedores.focus();
+    });
+
+    // Cerrar modal WhatsApp
+    function cerrarModalWhatsApp() {
+      modalWhatsApp.classList.add("hidden");
+      modalWhatsApp.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppBtn.addEventListener("click", cerrarModalWhatsApp);
+    btnCerrarWhatsApp.addEventListener("click", cerrarModalWhatsApp);
+
+    // Cerrar modal WhatsApp revendedores
+    function cerrarModalWhatsAppRevendedores() {
+      modalWhatsAppRevendedores.classList.add("hidden");
+      modalWhatsAppRevendedores.setAttribute("aria-hidden", "true");
+      btnMostrarFormularioCliente.focus();
+    }
+    cerrarModalWhatsAppRevendedoresBtn.addEventListener("click", cerrarModalWhatsAppRevendedores);
+    btnCerrarWhatsAppRevendedores.addEventListener("click", cerrarModalWhatsAppRevendedores);
+
+    // Enviar WhatsApp desde modal cuentas por vencer (botones individuales)
+    contenidoWhatsApp.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal revendedores por vencer (botones individuales)
+    contenidoWhatsAppRevendedores.addEventListener("click", (e) => {
+      if (e.target.closest(".btnEnviarWhatsAppRevendedorIndividual")) {
+        const btn = e.target.closest(".btnEnviarWhatsAppRevendedorIndividual");
+        const telefono = btn.dataset.telefono;
+        const mensaje = btn.dataset.mensaje;
+        if (telefono && mensaje) {
+          const url = `https://wa.me/${telefono}?text=${mensaje}`;
+          window.open(url, "_blank");
+        }
+      }
+    });
+
+    // Enviar WhatsApp desde modal botón general (envía al primer cliente listado)
+    btnEnviarWhatsAppModal.addEventListener("click", () => {
+      if (ventasPorVencer.length === 0) return;
+      const v = ventasPorVencer[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, tu cuenta de ${v.plataforma} (${v.pantalla}) vence el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Enviar WhatsApp desde modal revendedores botón general (envía al primer revendedor listado)
+    btnEnviarWhatsAppModalRevendedores.addEventListener("click", () => {
+      if (ventasPorVencerRevendedores.length === 0) return;
+      const v = ventasPorVencerRevendedores[0];
+      const diasRestantes = daysBetween(new Date(), new Date(v.fechaVencimiento));
+      const mensaje = encodeURIComponent(
+        `Hola ${v.cliente}, la cuenta de tu cliente de ${v.plataforma} (${v.pantalla}) se está por vencer el ${formatDate(v.fechaVencimiento)} (${diasRestantes} día${diasRestantes !== 1 ? "s" : ""} restantes). Precio: $${v.precio.toLocaleString()}. Gracias por preferirnos!`
+      );
+      const url = `https://wa.me/${v.telefono}?text=${mensaje}`;
+      window.open(url, "_blank");
+    });
+
+    // Mostrar formulario para cliente
+    btnMostrarFormularioCliente.addEventListener("click", () => {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Registrar Nueva Venta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "clienteNombre";
+      clienteNombreInput.id = "clienteNombre";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Mostrar formulario para revendedor
+    btnMostrarFormularioRevendedor.addEventListener("click", () => {
+      esVentaRevendedor = true;
+      tituloFormulario.textContent = "Registrar Venta de Revendedores";
+      labelNombreCliente.textContent = "Nombre del revendedor ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      clienteNombreInput.name = "nombreRevendedor";
+      clienteNombreInput.id = "nombreRevendedor";
+      clienteNombreInput.placeholder = "";
+      clienteNombreInput.focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Cancelar formulario
+    btnCancelarFormulario.addEventListener("click", () => {
+      formularioRegistro.classList.add("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "true");
+      ventaForm.reset();
+      setDefaults();
+      btnMostrarFormularioCliente.focus();
+    });
+
+    // Agregar cuenta para cliente existente
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".agregarCuenta")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".agregarCuenta");
+        const cliente = btn.dataset.cliente;
+        const telefono = btn.dataset.telefono;
+        abrirFormularioAgregarCuenta(cliente, telefono);
+      }
+    });
+
+    function abrirFormularioAgregarCuenta(cliente, telefono) {
+      esVentaRevendedor = false;
+      tituloFormulario.textContent = "Agregar Nueva Cuenta";
+      labelNombreCliente.textContent = "Nombre del cliente ";
+      const spanReq = document.createElement("span");
+      spanReq.className = "text-red-600";
+      spanReq.textContent = "*";
+      labelNombreCliente.appendChild(spanReq);
+
+      ventaForm.reset();
+      setDefaults();
+
+      clienteNombreInput.value = cliente;
+      clienteTelefonoInput.value = telefono;
+      clienteNombreInput.focus();
+
+      formularioRegistro.classList.remove("hidden");
+      formularioRegistro.setAttribute("aria-hidden", "false");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Al cargar la página
+    actualizarEstadisticas();
+    renderTablaVentas();
+  </script>
+</body>
+</html>
